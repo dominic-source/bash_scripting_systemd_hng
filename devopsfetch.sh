@@ -11,7 +11,7 @@
 #     echo "Please run as root"
 #     exit
 # fi
-sudo echo ""
+sudo echo -n ""
 
 info_output() {
     echo "Usage: devopsfetch [-p | --port] [-d | --docker] [-n | --nginx] [-u | --users] [-t | --time]"
@@ -63,7 +63,12 @@ list_all_nginx_domains_ports() {
 
 list_all_users_login__times() {
     printf "%-20s %-20s %-20s %-20s\n" "USER" "LAST LOGIN" "LOGIN TIME" "TERMINAL"
-    getent passwd | cut -d: -f1 | while read -r user; do
+    getent passwd | while IFS=: read -r user _ _ _ _ _ shell; do
+        # Skip service users
+        if [[ "$shell" == "/usr/sbin/nologin" || "$shell" == "/bin/false" ]]; then
+            continue
+        fi
+
         read login_date login_time duration terminal <<< $(last -w -n 1 $user | awk -v user="$user" '$1 == user { print $5, $6, $7, $2 $NF }')
         if [ -z "$login_date" ]; then
             login="Never logged in"
@@ -85,10 +90,10 @@ list_all_users_login__times() {
     done
 }
 
-
 # display all active ports and services
 if [ "$1" = "-p" ] || [ "$1" = "--port" ]; then
     if [ "$2" ]; then
+        printf "%-20s %-20s %-20s\n" "USER" "PORT" "SERVICE"
         list_all_active_ports_service | grep "$2 "
         exit 0
     else

@@ -79,8 +79,9 @@ sudo tee /etc/logrotate.d/devopsfetch > /dev/null <<EOL
     create 0640 root utmp
     sharedscripts
     postrotate
-        systemctl reload devopsfetch.service > /dev/null
+        systemctl restart devopsfetch.service > /dev/null
     endscript
+    su root utmp
 }
 EOL
 
