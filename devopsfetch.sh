@@ -11,13 +11,21 @@
 #     echo "Please run as root"
 #     exit
 # fi
-
 sudo echo ""
+
 info_output() {
     echo "Usage: devopsfetch [-p | --port] [-d | --docker] [-n | --nginx] [-u | --users] [-t | --time]"
 }
 
 LOG_FILE="/var/log/devopsfetch.log"
+if [ -e $LOG_FILE ]; then
+    # Rotate the log file
+    sudo logrotate -f /etc/logrotate.d/devopsfetch
+else
+    # Create the log file
+    sudo touch $LOG_FILE
+    sudo chown $USER:$USER $LOG_FILE
+fi
 
 date_to_timestamp() {
     date -d "$1" '+%s'
@@ -40,7 +48,7 @@ list_all_docker_images_containers() {
 }
 
 list_all_nginx_domains_ports() {
-    printf "%-20s %-20s %-20s\n" "NGINX DOMAIN" "PORT" "PROXY"
+    printf "%-30s %-30s %-30s\n" "NGINX DOMAIN" "PORT" "PROXY"
     sudo nginx -T 2>&1 | grep -P 'server_name|listen|proxy_pass' | grep -vP '^\s*#' | tac | while read -r line; do
         if [[ $line =~ proxy_pass ]]; then
             proxy=$(echo $line | awk '{print$2}' | tr -d ';')
@@ -48,7 +56,7 @@ list_all_nginx_domains_ports() {
             domain=$(echo $line | awk '{print $2}' | tr -d ';')
         elif [[ $line =~ listen ]]; then
             port=$(echo $line | awk '{print $2}' | tr -d ';')
-            printf "%-20s %-20s %-20s\n" "$domain" "$port" "$proxy"
+            printf "%-30s %-30s %-30s\n" "$domain" "$port" "$proxy"
         fi
     done
 }
@@ -170,6 +178,29 @@ elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  -l, --logs  [FORMAT]         Display logs within a specified time range. format 'YYYY-MM-DD HH:MM:SS' 'YYYY-MM-DD HH:MM:SS'"
 
     exit 0
+
+elif [ "$1" = "-t" ] || [ "$1" = "--time" ]; then
+     # Display activities within a specified time range
+    if [ "$2" ] && [ "$3" ]; then
+        # Extract start and end dates
+        journalctl --since "$2" --until "$3"
+        if [ $? -ne 0 ]; then
+            echo "Invalid date format. Please use 'YYYY-MM-DD HH:MM:SS' 'YYYY-MM-DD HH:MM:SS'."
+            exit 1
+        fi
+        exit 0
+    elif [ "$2" ]; then
+        journalctl --since "$2"
+        if [ $? -ne 0 ]; then
+            echo "Invalid date format. Please use 'YYYY-MM-DD HH:MM:SS' 'YYYY-MM-DD HH:MM:SS'."
+            exit 1
+        fi
+        exit 0
+    else
+        info_output
+        echo "Please provide a start and end time in the format: YYYY-MM-DD HH:MM:SS YYYY-MM-DD HH:MM:SS"
+        exit 0
+    fi
 elif [ "$1" = "-l" ] || [ "$1" = "--logs" ]; then
     # Display activities within a specified time range
     if [ "$2" ]; then
