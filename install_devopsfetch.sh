@@ -57,10 +57,10 @@ EOL
 # /etc/systemd/system/devopsfetch.timer
 sudo tee /etc/systemd/system/devopsfetch.timer > /dev/null <<EOL
 [Unit]
-Description=Run DevOpsFetch every 5 minutes
+Description=Run DevOpsFetch every 1 minutes
 
 [Timer]
-OnCalendar=*:0/5
+OnCalendar=*:0/1
 Persistent=true
 
 [Install]
