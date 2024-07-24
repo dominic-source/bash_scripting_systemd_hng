@@ -84,11 +84,23 @@ sudo tee /etc/logrotate.d/devopsfetch > /dev/null <<EOL
 }
 EOL
 
-# Reload systemd and start the service
-sudo systemctl daemon-reload
-sudo systemctl start devopsfetch.service &> /dev/null
-sudo systemctl enable devopsfetch.service &> /dev/null
-sudo systemctl enable devopsfetch.timer &> /dev/null
-sudo systemctl start devopsfetch.timer &> /dev/null
+# Function to check if systemctl exists
+function use_systemctl {
+    command -v systemctl &> /dev/null
+}
+
+# Reload systemd and start the service/timer
+if use_systemctl; then
+    sudo systemctl daemon-reload
+    sudo systemctl start devopsfetch.service &> /dev/null
+    sudo systemctl enable devopsfetch.service &> /dev/null
+    sudo systemctl enable devopsfetch.timer &> /dev/null
+    sudo systemctl start devopsfetch.timer &> /dev/null
+else
+    sudo service devopsfetch start &> /dev/null
+    sudo service devopsfetch enable &> /dev/null
+    sudo service devopsfetch.timer enable &> /dev/null
+    sudo service devopsfetch.timer start &> /dev/null
+fi
 
 echo "DevOpsFetch installation completed successfully"
