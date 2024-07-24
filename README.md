@@ -4,8 +4,9 @@
 
 1. Clone the repository:
 ```bash
-git clone <repository_url>
-cd <repository_directory>
+cd $HOME
+git clone https://github.com/dominic-source/bash_scripting_systemd_hng.git
+cd bash_scripting_systemd_hng
 ```
 
 2. Run the installation script:
