@@ -61,7 +61,6 @@ devopsfetch -u
 devopsfetch -u username
 ```
 
-
 ## Logging Mechanism
 - Logs are stored in /var/log/devopsfetch.log.
 - Log rotation and management are configured using logrotate.
@@ -71,9 +70,9 @@ devopsfetch -u username
 
 1. View logs within a specific time range (the best way):
 ```bash
-devopsfetch -t "YYYY-MM-DD HH:MM:SS" "YYYY-MM-DD HH:MM:SS"
+devopsfetch -l "YYYY-MM-DD HH:MM:SS" "YYYY-MM-DD HH:MM:SS"
 ```
-*e.g. devopsfetch -t "2024-07-24 20:13:06"  "2024-07-24 20:13:25"*
+*e.g. devopsfetch -l "2024-07-24 20:13:06"  "2024-07-24 20:13:25"*
 
 2. View the entire log file:
 ```bash
