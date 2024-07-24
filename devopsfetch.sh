@@ -165,26 +165,31 @@ elif [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  -d, --docker [CONTAINER]     List all Docker images and containers or provide detailed information about a specific container."
     echo "  -n, --nginx [DOMAIN]         Display all Nginx domains and their ports or provide detailed configuration information for a specific domain."
     echo "  -u, --users [USERNAME]       List all users and their last login times or provide detailed information about a specific user."
-    echo "  -t, --time  [FORMAT]         Display activities within a specified time range. format 'YYYY-MM-DD HH:MM:SS'"
+    echo "  -t, --time  [FORMAT]         Display system activities within a specified time range. format 'YYYY-MM-DD HH:MM:SS' 'YYYY-MM-DD HH:MM:SS'"
     echo "  -h, --help                   Display this help and exit."
+    echo "  -l, --logs  [FORMAT]         Display logs within a specified time range. format 'YYYY-MM-DD HH:MM:SS' 'YYYY-MM-DD HH:MM:SS'"
+
     exit 0
-elif [ "$1" = "-t" ] || [ "$1" = "--time" ]; then
+elif [ "$1" = "-l" ] || [ "$1" = "--logs" ]; then
     # Display activities within a specified time range
-    if [ "$2" ] && [ "$3" ]; then
+    if [ "$2" ]; then
         # Extract start and end dates
         start_time="$2"
-        end_time="$3"
+        if [ -z "$3" ]; then
+            end_time=$start_time
+        else
+            end_time="$3"
+        fi
 
         # Convert dates to timestamps
         start_timestamp=$(date_to_timestamp "$start_time")
         end_timestamp=$(date_to_timestamp "$end_time")
 
         # Check if the timestamps are valid
-        if [ -z "$start_timestamp" ] || [ -z "$end_timestamp" ]; then
+        if [ -z "$start_timestamp" ]; then
             echo 'Invalid date format. Please use "YYYY-MM-DD HH:MM:SS" "YYYY-MM-DD HH:MM:SS".'
             exit 1
         fi
-
         # Filter logs between the start and end timestamps
         awk -v start="$start_timestamp" -v end="$end_timestamp" '
         {
@@ -202,7 +207,7 @@ elif [ "$1" = "-t" ] || [ "$1" = "--time" ]; then
         exit 0
     else
         info_output
-        echo "Please provide a start and end time in the format: YYYY-MM-DD HH:MM:SS."
+        echo "Please provide a start and end time in the format: YYYY-MM-DD HH:MM:SS YYYY-MM-DD HH:MM:SS"
         exit 0
     fi
 fi
